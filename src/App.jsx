@@ -7,6 +7,7 @@ import InvestmentForm from "@/components/InvestmentForm";
 import RecordsList from "@/components/RecordsList";
 import Analytics from "@/components/Analytics";
 import Settings from "@/components/Settings";
+import ImageLibrary from "@/components/ImageLibrary";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/add-record" element={<InvestmentForm />} />
             <Route path="/records" element={<RecordsList />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/images" element={<ImageLibrary />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>

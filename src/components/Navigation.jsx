@@ -7,7 +7,8 @@ import {
   TrendingUp, 
   Settings, 
   Menu, 
-  X 
+  X,
+  Images
 } from "lucide-react";
 
 function Navigation() {
@@ -19,6 +20,7 @@ function Navigation() {
     { path: "/add-record", label: "記録追加", icon: PlusCircle },
     { path: "/records", label: "記録一覧", icon: FileText },
     { path: "/analytics", label: "分析", icon: TrendingUp },
+    { path: "/images", label: "画像ライブラリ", icon: Images },
     { path: "/settings", label: "設定", icon: Settings },
   ];
 

@@ -11,6 +11,7 @@ import {
   FileImage,
   AlertCircle
 } from "lucide-react";
+import EnhancedImageUpload from "./EnhancedImageUpload";
 
 const InvestmentForm = () => {
   const [formData, setFormData] = useState({
@@ -24,7 +25,8 @@ const InvestmentForm = () => {
     stopLoss: "",
     timeframe: "",
     analysis: "",
-    chartImages: []
+    chartImages: [],
+    enhancedImages: []
   });
 
   const [errors, setErrors] = useState({});
@@ -142,7 +144,8 @@ const InvestmentForm = () => {
         stopLoss: "",
         timeframe: "",
         analysis: "",
-        chartImages: []
+        chartImages: [],
+        enhancedImages: []
       });
 
       alert("投資記録が正常に保存されました！");
@@ -348,56 +351,20 @@ const InvestmentForm = () => {
             </div>
           </div>
 
-          {/* チャート画像アップロード */}
+          {/* 強化された画像アップロード */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">チャート画像</h3>
-            
-            <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                isDragActive 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              <input {...getInputProps()} />
-              <FileImage className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              {isDragActive ? (
-                <p className="text-blue-600">ファイルをドロップしてください...</p>
-              ) : (
-                <div>
-                  <p className="text-gray-600 mb-2">
-                    チャート画像をドラッグ&ドロップするか、クリックして選択
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    PNG, JPG, GIF, WebP形式をサポート
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* アップロードされた画像のプレビュー */}
-            {formData.chartImages.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {formData.chartImages.map((image) => (
-                  <div key={image.id} className="relative group">
-                    <img
-                      src={image.preview}
-                      alt={image.name}
-                      className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(image.id)}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                    <p className="text-xs text-gray-500 mt-1 truncate">{image.name}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+            <h3 className="text-lg font-semibold text-gray-900">関連画像</h3>
+            <EnhancedImageUpload
+              onImagesUploaded={(images) => {
+                setFormData(prev => ({
+                  ...prev,
+                  enhancedImages: [...(prev.enhancedImages || []), ...images]
+                }));
+              }}
+              recordId={null} // 保存後に設定
+              maxFiles={10}
+              showLibrary={false}
+            />
           </div>
 
           {/* 分析内容 */}
@@ -441,7 +408,8 @@ const InvestmentForm = () => {
                     stopLoss: "",
                     timeframe: "",
                     analysis: "",
-                    chartImages: []
+                    chartImages: [],
+                    enhancedImages: []
                   });
                   setErrors({});
                 }
