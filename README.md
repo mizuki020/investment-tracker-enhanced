@@ -1,106 +1,177 @@
-# Services Landing Page Template
-This project is a professional services landing page template built with modern web technologies. It serves as a foundational template that can be customized for any service-based business including consulting firms, agencies, healthcare practices, law firms, and more.
+# 投資記録AI - 強化された画像アップロード機能付き
 
-## Tech Stack
-- **React** - UI library
-- **Vite** - Build tool
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library
-- **pnpm** - Package manager
-- **React Router** - Routing library
+株式投資の記録とAI分析を支援するWebアプリケーション。投資家の経験を「再利用可能な資産」に変える包括的なプラットフォームです。
 
-## Core Requirements
+## 🚀 主要機能
 
-### Tech Stack & Setup
-- React + Vite with JavaScript (no TypeScript)
-- Tailwind CSS for all styling (no external CSS, CSS modules, or inline styles unless absolutely necessary)
+### 📊 投資記録管理
+- **包括的な記録システム**: 銘柄情報、投資戦略、予想、実績を一元管理
+- **詳細な分析メモ**: テクニカル・ファンダメンタル分析の記録
+- **投資期間・目標価格・ストップロス設定**: リスク管理の徹底
 
-### Folder Structure
+### 🖼️ 強化された画像管理システム
+- **大容量対応**: 最大20枚、各10MBまでの画像を同時アップロード
+- **自動圧縮**: Web Worker による高速画像圧縮
+- **カテゴリ・タグ管理**: チャート、ニュース、分析レポート等の分類
+- **高度な検索機能**: ファイル名、カテゴリ、タグによる複合検索
+- **プレビュー・一括操作**: 効率的な画像管理
+
+### 📈 分析・統計機能
+- **パフォーマンス分析**: 月別利益推移、勝率、予想精度
+- **セクター別分析**: 投資分野ごとの成果比較
+- **投資期間別分析**: 短期・中期・長期投資の傾向分析
+- **視覚的ダッシュボード**: 重要指標の一目確認
+
+### 🔍 検索・フィルタリング
+- **高速検索**: 銘柄、企業名、分析内容での検索
+- **多軸フィルタリング**: 日付、予想、投資期間での絞り込み
+- **CSVエクスポート**: 外部ツールとの連携
+
+## 🛠️ 技術スタック
+
+### フロントエンド
+- **React 19.1.1**: モダンなUI構築
+- **Vite 7.1.2**: 高速開発環境
+- **Tailwind CSS 4.1.11**: ユーティリティファーストCSS
+- **React Router 7.8.0**: SPA ルーティング
+- **Lucide React**: 美しいアイコンセット
+
+### 画像処理・管理
+- **browser-image-compression 2.0.2**: 高性能画像圧縮
+- **react-dropzone 14.3.8**: ドラッグ&ドロップ機能
+- **Dexie 4.2.0**: IndexedDB管理
+- **react-image-crop 11.0.10**: 画像編集機能
+
+### データ可視化
+- **Recharts 3.2.1**: インタラクティブチャート
+- **date-fns 4.1.0**: 日付処理ライブラリ
+
+## 🚀 セットアップ
+
+### 前提条件
+- Node.js 18.0.0 以上
+- pnpm または npm
+
+### インストール
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/mizuki020/investment-tracker-enhanced.git
+cd investment-tracker-enhanced
+
+# 依存関係をインストール
+pnpm install
+# または
+npm install
+
+# 開発サーバーを起動
+pnpm dev
+# または
+npm run dev
+```
+
+### ビルド
+
+```bash
+# プロダクションビルド
+pnpm build
+# または
+npm run build
+
+# ビルド結果をプレビュー
+pnpm preview
+# または
+npm run preview
+```
+
+## 📱 使用方法
+
+### 1. 投資記録の作成
+1. **記録追加**ページにアクセス
+2. 銘柄情報、投資金額、予想等を入力
+3. 関連画像（チャート、ニュース等）をアップロード
+4. 詳細な分析メモを記録
+5. 保存して記録完了
+
+### 2. 画像管理
+1. **画像ライブラリ**で全画像を管理
+2. カテゴリ・タグでの分類・検索
+3. グリッド・リスト表示の切り替え
+4. 一括操作による効率的な管理
+
+### 3. 分析・レビュー
+1. **分析**ページで投資パフォーマンスを確認
+2. **記録一覧**で過去の投資を検索・フィルタリング
+3. 成功・失敗パターンの分析
+4. 投資戦略の改善
+
+## 🎯 特徴的な機能
+
+### 画像アップロード機能
+- **並列処理**: 複数画像の同時処理
+- **自動最適化**: 圧縮率70%でストレージ効率化
+- **メタデータ管理**: 解像度、ファイルサイズ等の自動記録
+- **エラーハンドリング**: 詳細なエラーメッセージと復旧支援
+
+### データ管理
+- **IndexedDB**: ブラウザ内永続ストレージ
+- **高速検索**: インデックス最適化による瞬時検索
+- **データ整合性**: トランザクション管理による安全な操作
+
+### ユーザビリティ
+- **レスポンシブデザイン**: あらゆるデバイスで最適表示
+- **アクセシビリティ**: WCAG準拠の使いやすさ
+- **直感的UI**: ドラッグ&ドロップ等の自然な操作
+
+## 🔮 将来の拡張計画
+
+### AI連携機能
+- **画像認識**: チャートパターンの自動分析
+- **自動タグ付け**: 画像内容の自動分類
+- **投資支援**: AIによる投資判断サポート
+
+### 高度な分析
+- **機械学習**: 投資パターンの自動発見
+- **予測モデル**: 過去データからの成果予測
+- **リスク分析**: ポートフォリオリスクの定量化
+
+### 連携機能
+- **API連携**: リアルタイム株価データ取得
+- **クラウド同期**: 複数デバイス間でのデータ共有
+- **レポート生成**: PDF形式での投資レポート出力
+
+## 📁 プロジェクト構成
+
 ```
 src/
-  components/    # Reusable UI components
-  pages/         # Page-level components
-  utils/         # Utility functions
-  App.jsx        # Main application component
-  main.jsx       # Entry point
-public/          # Public assets
+├── components/           # UIコンポーネント
+│   ├── Dashboard.jsx     # ダッシュボード
+│   ├── InvestmentForm.jsx # 投資記録フォーム
+│   ├── RecordsList.jsx   # 記録一覧
+│   ├── Analytics.jsx     # 分析画面
+│   ├── EnhancedImageUpload.jsx # 強化画像アップロード
+│   ├── ImageLibrary.jsx  # 画像ライブラリ
+│   ├── Navigation.jsx    # ナビゲーション
+│   └── Settings.jsx      # 設定画面
+├── utils/               # ユーティリティ
+│   ├── imageDatabase.js # IndexedDB管理
+│   └── imageUtils.js    # 画像処理関数
+├── App.jsx             # メインアプリケーション
+└── main.jsx            # エントリーポイント
 ```
 
-### Layout & Structure
-- Structure components to reflect high-level semantic sections of the page
-- Current template structure:
-```jsx
-<Router>
-  <div className="min-h-screen bg-white">
-    <Navigation />
-    <main>
-      <Hero />
-      <About />
-      <Statistics />
-      <Team />
-      <Services />
-      <Testimonials />
-      <LocationsBanner />
-    </main>
-    <Footer />
-  </div>
-</Router>
-```
-- Components are modular and can be easily customized or removed
-- Each section uses semantic HTML for accessibility
+## 📄 ライセンス
 
-### Routing & Links
-- Implement all accessible routes from the original site
-- No empty or dead links — all navigation should lead to a functional page or section
-- Use react-router-dom for multi-page routing
-- Replicate smooth scrolling for anchor links if present
+MIT License
 
-### Styling
-- Match the visual style of the source site as closely as possible using Tailwind classes
-- Ensure full responsiveness across breakpoints
-- Use Tailwind spacing scales and responsive utilities instead of arbitrary pixel values unless needed for precision
+## 🤝 コントリビューション
 
-### Animations & Interactivity
-- Recreate animations and micro-interactions from the original site
-- Use Framer Motion or Tailwind transitions for performance-friendly effects
-- Avoid excessive animations or layout shifts that harm UX or accessibility
+プルリクエストやイシューの報告を歓迎します。
 
-### HTML Semantics & Accessibility
-- Use semantic HTML (header, nav, main, section, footer) instead of generic `<div>` containers
-- Add descriptive alt text for all images, aria-label for icons, and correct heading levels
+## 📞 サポート
 
-## Features
-- Modern React with hooks and functional components
-- Fast refresh with Vite
-- Responsive design capabilities with Tailwind
-- Smooth animations with Framer Motion
-- Import aliases configured (`@/` points to `src/`)
-- Optimized for performance
+質問や提案がございましたら、GitHubのIssuesでお気軽にお知らせください。
 
-## UI Component Libraries
-While the primary goal is to match the original site's design as closely as possible, the AI agent may consider using these component libraries for functionality:
-- **Magic UI** ([magicui.design](https://magicui.design/)) - 150+ free and open-source animated components built with React, Tailwind CSS, and Motion
-- **shadcn/ui** ([ui.shadcn.com](https://ui.shadcn.com/)) - A collection of beautifully designed, accessible components that can be copied and customized
+---
 
-> **Important**: These libraries should be used primarily for functionality and interaction patterns. The visual styling must still adhere to the original website's design. Component styles should be customized to match the target site's look and feel.
-
-## Getting Started
-```bash
-# Install dependencies
-pnpm install
-# Start development server
-pnpm dev
-# Build for production
-pnpm build
-# Preview production build
-pnpm preview
-```
-
-## Import Aliases
-This project is configured with import aliases for cleaner imports:
-```javascript
-// Instead of this:
-import Component from '../../components/Component'
-// You can use:
-import Component from '@/components/Component'
-```
+**投資記録AI** - あなたの投資経験を資産に変える
