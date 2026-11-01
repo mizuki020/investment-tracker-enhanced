@@ -1,0 +1,31 @@
+name: J-Quants adapter checks
+on:
+  push:
+    branches: [feature/stock-analysis-skill-v1]
+    paths:
+      - 'market_data/jquants_v2.py'
+      - 'market_data/indicators.py'
+      - 'tests/test_jquants_v2.py'
+      - 'tests/test_market_data_indicators.py'
+      - '.github/workflows/jquants-adapter-check.yml'
+  pull_request:
+    paths:
+      - 'market_data/jquants_v2.py'
+      - 'market_data/indicators.py'
+      - 'tests/test_jquants_v2.py'
+      - 'tests/test_market_data_indicators.py'
+      - '.github/workflows/jquants-adapter-check.yml'
+  workflow_dispatch:
+
+jobs:
+  offline-adapter-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate adapter and indicators without external API
+        run: python -m unittest discover -s tests -p 'test_*market_data*.py' -v
+      - name: Validate J-Quants adapter tests
+        run: python -m unittest discover -s tests -p 'test_jquants_v2.py' -v
