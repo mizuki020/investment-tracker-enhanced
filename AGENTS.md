@@ -4,6 +4,21 @@
 This repository contains an investment-recording application and a draft Japanese stock-analysis skill.
 Do not place brokerage orders, interact with order-entry systems, or claim that a trade was executed.
 
+## Project mission and roadmap (read before planning any task)
+
+Read `docs/PROJECT_ROADMAP.md` before proposing or implementing work. It defines the
+long-term objective, current phase, dependencies, acceptance criteria, and safety
+boundaries. Read `docs/DEV_LOG_TEMPLATE.md` for evidence-based progress records.
+
+At the start of each task, briefly state:
+- North Star: verified, repeatable trading decisions and eventual safely audited automation.
+- Current phase and why this task matters to that phase.
+- Exact acceptance criteria, evidence to collect, and what remains prohibited.
+
+At the end, report what was verified versus assumed, tests actually run, commit SHA,
+remaining risks, and next actionable step. Never confuse offline mocks with live
+API validation. Keep the daily trading journal separate from the development log.
+
 ## Stock analysis routing
 When the user's request includes the Japanese keyword `解析鑑定`, consult
 `.agents/skills/stock-analysis-triad/SKILL.md` before answering or modifying code.
