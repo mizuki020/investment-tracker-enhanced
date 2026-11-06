@@ -1,0 +1,20 @@
+name: Stock analysis skill contract
+
+on:
+  pull_request:
+    paths:
+      - '.agents/skills/stock-analysis-triad/**'
+      - 'tests/test_stock_analysis_skill.py'
+      - '.github/workflows/stock-analysis-skill-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-skill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate skill structure
+        run: python -m unittest discover -s tests -p 'test_stock_analysis_skill.py' -v
