@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Iterable
 
-from market_data.snapshots import timestamp
+from market_data.snapshots import timestamp, validate_timestamp_text
 
 POLICY_VERSION = "quality/1"
 
@@ -83,6 +83,7 @@ class CheckResult:
     purpose: Purpose
 
     def __post_init__(self):
+        validate_timestamp_text(self.evaluated_at)
         if type(self.check) is not Check or type(self.status) is not Status:
             raise ValueError("unknown check or status")
         if type(self.purpose) is not Purpose:
@@ -126,6 +127,7 @@ def evaluate_rights(*, action: Action, claim: RightClaim,
                     target: str, evaluated_at: str,
                     policy_version: str = POLICY_VERSION) -> CheckResult:
     """A contract claim/reference never authenticates itself. No allow path yet."""
+    validate_timestamp_text(evaluated_at)
     check = _rights_check(action)
     if contract_reference is not None:
         _text(contract_reference)
@@ -161,6 +163,7 @@ def _safe_context(purpose, target, evaluated_at):
         target = None
         errors.append("invalid_target")
     try:
+        validate_timestamp_text(evaluated_at)
         timestamp(evaluated_at)
     except Exception:
         evaluated_at = None
@@ -182,6 +185,8 @@ class GateDecision:
     policy_version: str = POLICY_VERSION
 
     def __post_init__(self):
+        if self.evaluated_at is not None:
+            validate_timestamp_text(self.evaluated_at)
         if type(self.status) is not Status or self.policy_version != POLICY_VERSION:
             raise ValueError("invalid decision status or policy")
         _text(self.policy_version)
@@ -320,9 +325,14 @@ def revalidate_decision(decision: GateDecision, *, purpose: Purpose, target: str
             return stop("invalid_decision")
         decision.__post_init__()
         if (decision.purpose is not purpose or decision.target != target
-                or decision.evaluated_at is None
-                or timestamp(decision.evaluated_at) != timestamp(evaluated_at)
                 or decision.policy_version != policy_version):
+            return stop("decision_context_mismatch")
+        # A validated diagnostic may deliberately omit a rejected timestamp.
+        # Preserve that absence and its original reason; do not fill it with now.
+        if not decision.checks and decision.evaluated_at is None:
+            return decision
+        if (decision.evaluated_at is None
+                or timestamp(decision.evaluated_at) != timestamp(evaluated_at)):
             return stop("decision_context_mismatch")
         if not decision.checks:
             return decision  # Validated diagnostic BLOCK; never promote to UNVERIFIED.

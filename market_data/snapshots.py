@@ -15,9 +15,23 @@ from zoneinfo import ZoneInfo
 from market_data.jquants_v2 import normalize_bars
 
 
-def timestamp(value: str) -> datetime:
+MAX_TIMESTAMP_CHARS = 256
+# Provisional daily-version budget, aligned with completeness.MAX_ROWS.
+MAX_SELECTION_VERSIONS = 4096
+
+
+def validate_timestamp_text(value: str) -> None:
+    """Bound text before parsing; this does not verify provenance or chronology."""
     if type(value) is not str:
         raise ValueError("timestamp must be an immutable string")
+    if not value or len(value) > MAX_TIMESTAMP_CHARS:
+        raise ValueError("timestamp must contain 1..256 characters")
+    if not value.strip():
+        raise ValueError("timestamp must not be blank")
+
+
+def timestamp(value: str) -> datetime:
+    validate_timestamp_text(value)
     result = datetime.fromisoformat(value)
     if result.tzinfo is None or result.utcoffset() is None:
         raise ValueError("timestamp requires timezone")
@@ -58,6 +72,42 @@ class TimeEvidence:
         return self.status == "verified"
 
 
+def _validate_bar_time_text(bar):
+    """Preflight every child time without parsing, hashing or numeric conversion."""
+    if type(bar) is not BarVersion:
+        raise ValueError("immutable BarVersion required")
+    validate_timestamp_text(bar.first_observed_at)
+    validate_timestamp_text(bar.retrieved_at)
+    for evidence in (bar.published_at, bar.available_at):
+        if type(evidence) is not TimeEvidence:
+            raise ValueError("immutable TimeEvidence required")
+        if evidence.value is not None:
+            validate_timestamp_text(evidence.value)
+
+
+def _validate_bar_times(bar):
+    """Validate both evidence objects eagerly, independently of verified status."""
+    _validate_bar_time_text(bar)
+    day = trade_day(bar.trade_date)
+    bar.published_at.__post_init__()
+    bar.available_at.__post_init__()
+    observed, retrieved = map(timestamp, (bar.first_observed_at, bar.retrieved_at))
+    if observed.astimezone(ZoneInfo("Asia/Tokyo")).date() < day:
+        raise ValueError("observation cannot precede trade date")
+    if observed > retrieved:
+        raise ValueError("first observation cannot follow retrieval")
+    for evidence in (bar.published_at, bar.available_at):
+        if evidence.value is not None:
+            instant = timestamp(evidence.value)
+            if instant > observed:
+                raise ValueError("publication/availability cannot follow observation")
+            if instant.astimezone(ZoneInfo("Asia/Tokyo")).date() < day:
+                raise ValueError("daily bar cannot precede its trade date")
+    if bar.published_at.value and bar.available_at.value:
+        if timestamp(bar.published_at.value) > timestamp(bar.available_at.value):
+            raise ValueError("availability cannot precede publication")
+
+
 @dataclass(frozen=True)
 class BarVersion:
     provider: str
@@ -78,11 +128,7 @@ class BarVersion:
     currency: str = "JPY"
 
     def __post_init__(self):
-        trade_day(self.trade_date)
-        for evidence in (self.published_at, self.available_at):
-            if type(evidence) is not TimeEvidence:
-                raise ValueError("time evidence must use immutable TimeEvidence")
-            evidence.__post_init__()
+        _validate_bar_times(self)
         if not all(isinstance(v, str) and v.strip() for v in
                    (self.provider, self.code, self.market, self.currency)):
             raise ValueError("source and instrument identity required")
@@ -104,21 +150,6 @@ class BarVersion:
         normalize_bars([dict(Date=self.trade_date, Code=self.code,
                              O=self.open, H=self.high, L=self.low, C=self.close,
                              Vo=self.volume)], code=self.code, as_of=self.trade_date)
-        observed, retrieved = map(timestamp, (self.first_observed_at, self.retrieved_at))
-        if observed.astimezone(ZoneInfo("Asia/Tokyo")).date() < date.fromisoformat(self.trade_date):
-            raise ValueError("observation cannot precede trade date")
-        if observed > retrieved:
-            raise ValueError("first observation cannot follow retrieval")
-        for evidence in (self.published_at, self.available_at):
-            if evidence.value is not None:
-                t = timestamp(evidence.value)
-                if t > observed:
-                    raise ValueError("publication/availability cannot follow observation")
-                if t.astimezone(ZoneInfo("Asia/Tokyo")).date() < date.fromisoformat(self.trade_date):
-                    raise ValueError("daily bar cannot precede its trade date")
-        if self.published_at.value and self.available_at.value:
-            if timestamp(self.published_at.value) > timestamp(self.available_at.value):
-                raise ValueError("availability cannot precede publication")
 
     @property
     def key(self):
@@ -150,6 +181,7 @@ class AcquisitionManifest:
     schema_version: str = "acquisition/1"
 
     def __post_init__(self):
+        validate_timestamp_text(self.retrieved_at)
         if self.schema_version != "acquisition/1":
             raise ValueError("unsupported manifest schema")
         if not all(isinstance(v, str) and v.strip() for v in
@@ -169,9 +201,16 @@ class Snapshot:
     schema_version: str = "snapshot/1"
 
     def __post_init__(self):
+        if type(self.manifest) is not AcquisitionManifest:
+            raise ValueError("immutable AcquisitionManifest required")
+        validate_timestamp_text(self.manifest.retrieved_at)
         if self.schema_version != "snapshot/1" or type(self.bars) is not tuple:
             raise ValueError("unsupported schema or mutable bars")
         for bar in self.bars:
+            _validate_bar_time_text(bar)
+        self.manifest.__post_init__()
+        for bar in self.bars:
+            _validate_bar_times(bar)
             m = self.manifest
             if (bar.provider, bar.code) != (m.provider, m.code):
                 raise ValueError("manifest/bar identity mismatch")
@@ -182,11 +221,16 @@ class Snapshot:
 
     def to_dict(self):
         """Return a detached JSON-compatible value, without persisting anything."""
+        self.__post_init__()
         return asdict(self)
 
 
 def compare_snapshots(previous: Snapshot, current: Snapshot) -> dict:
     """Compare only identical acquisition scopes; never interpret missing as deletion."""
+    if type(previous) is not Snapshot or type(current) is not Snapshot:
+        raise ValueError("immutable snapshots required")
+    previous.__post_init__()
+    current.__post_init__()
     a, b = previous.manifest, current.manifest
     if (a.provider, a.code, a.requested_from, a.requested_to) != (
             b.provider, b.code, b.requested_from, b.requested_to):
@@ -227,9 +271,17 @@ def select_as_of(versions: tuple[BarVersion, ...], *, decision_at: str,
     """
     if mode not in {"historical_research", "verified_backtest"}:
         raise ValueError("invalid selection mode")
+    validate_timestamp_text(decision_at)
+    if type(versions) is not tuple:
+        raise ValueError("versions requires an exact built-in tuple")
+    if len(versions) > MAX_SELECTION_VERSIONS:
+        raise ValueError("too many selection versions")
+    for bar in versions:
+        _validate_bar_time_text(bar)
     decision = timestamp(decision_at)
     candidates, excluded = {}, []
     for bar in versions:
+        _validate_bar_times(bar)
         if date.fromisoformat(bar.trade_date) > decision.astimezone(ZoneInfo("Asia/Tokyo")).date():
             excluded.append((bar.content_hash, "future_trade_date"))
             continue
