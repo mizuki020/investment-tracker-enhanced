@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Private market data and credentials
+private-data/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
